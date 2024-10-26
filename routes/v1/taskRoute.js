@@ -29,18 +29,18 @@ taskRouter.post(
 taskRouter.patch(
   "/update/:cardId",
   AuthMiddleware.checkAuthentication,
-  TaskController
+  TaskController.updateCard
 );
 taskRouter.patch(
   "/update/status/:cardId",
   AuthMiddleware.checkAuthentication,
-  TaskController
+  TaskController.updateCardStatus
 );
 
 taskRouter.delete(
   "/delete/:cardId",
   AuthMiddleware.checkAuthentication,
-  TaskController
+  TaskController.deleteCard
 );
 
 module.exports = taskRouter;
