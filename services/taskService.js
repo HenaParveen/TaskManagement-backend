@@ -10,10 +10,12 @@ const {
 const TaskModel = require("../models/taskModel");
 const AppError = require("../utils/error/app-error");
 const cardValidation = require("../utils/helpers/cardValidation");
+const { checkEmail } = require("../utils/helpers/helper");
 
-async function getAllCards(datePreference, status, userId) {
+async function getAllCards(datePreference, status, userId, email) {
   try {
     const currentDate = new Date();
+
     let startDate, endDate;
 
     if (!datePreference || datePreference.trim() === "") {
@@ -40,23 +42,21 @@ async function getAllCards(datePreference, status, userId) {
           );
       }
     }
-
     const query = {
       createdAt: { $gte: startDate, $lt: endDate },
-      refUserId: userId,
       ...(status && { status: status.toLowerCase() }),
+      $or: [{ refUserId: userId }, { assignee: email }],
     };
 
-    console.log(query, startDate, endDate);
     const cardsByDateAndStatus = await TaskModel.find(query);
     if (!cardsByDateAndStatus)
       throw new AppError(
         "Unable to fetch the data, please try again",
         StatusCodes.INTERNAL_SERVER_ERROR
       );
+
     return cardsByDateAndStatus;
   } catch (error) {
-    console.log("Unable to fetch card details:", error);
     if (error instanceof AppError) throw error;
     throw new AppError(
       "Unable to Fetch card details:" + error,
@@ -100,7 +100,6 @@ async function getAnalytics(userId) {
     };
     return data;
   } catch (error) {
-    console.log("Unable to fetch Analytics:", error);
     if (error instanceof AppError) throw error;
     throw new AppError(
       "Unable to fetch Analytics:" + error,
@@ -123,7 +122,6 @@ async function getCard(cardId) {
 
     return card;
   } catch (error) {
-    console.log("Unable to fetch card details:", error);
     if (error instanceof AppError) throw error;
     throw new AppError(
       "Unable to fetch card details:" + error,
@@ -137,12 +135,12 @@ async function addCard(cardDetails, userId) {
     const cardData = await cardValidation.validateAsync(cardDetails);
     const newCard = new TaskModel({
       ...cardData,
+      assignee: [cardData.assignee] || [],
       refUserId: userId,
     });
     const data = await newCard.save();
     return data;
   } catch (error) {
-    console.log("Unable to Add card :", error);
     if (error instanceof AppError) throw error;
     throw new AppError(
       "Unable to Add card :" + error,
@@ -151,7 +149,7 @@ async function addCard(cardDetails, userId) {
   }
 }
 
-async function updateCard(cardId, cardDetails) {
+async function updateCard(cardId, cardDetails, userId) {
   try {
     const cardData = await cardValidation.validateAsync(cardDetails);
     if (!cardId) {
@@ -167,15 +165,23 @@ async function updateCard(cardId, cardDetails) {
         StatusCodes.BAD_REQUEST
       );
     }
+
+    if (existingCard.refUserId.toString() !== userId.toString())
+      throw new AppError(
+        "Unauthorized to Update the card",
+        StatusCodes.UNAUTHORIZED
+      );
     existingCard.title = cardData.title || existingCard.title;
     existingCard.priority = cardData.priority || existingCard.priority;
     existingCard.tasks = cardData.tasks || existingCard.tasks;
     existingCard.dueDate = cardData.dueDate || existingCard.dueDate;
     existingCard.status = cardData.status || existingCard.status;
+    existingCard.assignee = cardData.assignee
+      ? [...existingCard.assignee, cardData.assignee]
+      : [...existingCard.assignee];
     const updatedCard = await existingCard.save();
     return updatedCard;
   } catch (error) {
-    console.log("Unable to update card :", error);
     if (error instanceof AppError) throw error;
     throw new AppError(
       "Unable to update card :" + error,
@@ -183,7 +189,30 @@ async function updateCard(cardId, cardDetails) {
     );
   }
 }
-async function updateCardStatus(cardId, tasks, status) {
+
+async function addAssignee(email, userId) {
+  try {
+    if (!checkEmail(email)) {
+      throw new AppError(
+        "Please provide Correct Email Id",
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    const response = await TaskModel.updateMany(
+      { refUserId: userId },
+      { $addToSet: { assignee: email } }
+    );
+    return response;
+  } catch (error) {
+    if (error instanceof AppError) throw error;
+    throw new AppError(
+      "Unable to update assignee to current user's all card :" + error,
+      StatusCodes.INTERNAL_SERVER_ERROR
+    );
+  }
+}
+async function updateTaskStatus(cardId, tasks, status, userId) {
   try {
     if (!cardId) {
       throw new AppError(
@@ -198,15 +227,19 @@ async function updateCardStatus(cardId, tasks, status) {
         StatusCodes.BAD_REQUEST
       );
     }
+    if (existingCard.refUserId.toString() !== userId.toString())
+      throw new AppError(
+        "Unauthorized to Update the card status",
+        StatusCodes.UNAUTHORIZED
+      );
     existingCard.tasks = tasks || existingCard.tasks;
     existingCard.status = status || existingCard.status;
     const updatedCard = await existingCard.save();
     return updatedCard;
   } catch (error) {
-    console.log("Unable to update status of card :", error);
     if (error instanceof AppError) throw error;
     throw new AppError(
-      "Unable to update status of card :" + error,
+      "Unable to update status of Task :" + error,
       StatusCodes.INTERNAL_SERVER_ERROR
     );
   }
@@ -234,7 +267,6 @@ async function deleteCard(cardId, userId) {
     const deletedCard = await existingCard.deleteOne();
     return deleteCard;
   } catch (error) {
-    console.log("Unable to delete card :", error);
     if (error instanceof AppError) throw error;
     throw new AppError(
       "Unable to delete card :" + error,
@@ -249,6 +281,7 @@ module.exports = {
   getCard,
   addCard,
   updateCard,
-  updateCardStatus,
+  updateTaskStatus,
   deleteCard,
+  addAssignee,
 };

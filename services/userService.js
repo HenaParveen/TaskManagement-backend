@@ -7,9 +7,6 @@ const bcrypt = require("bcrypt");
 
 async function register({ name, email, password }) {
   try {
-    //Code Logic
-
-    /* User Data level:- Validating Input Data which is coming from Client{Frontend, PostMan etc} */
     if (!name || !email || !password) {
       throw new AppError(
         "One of the field is missing, Please check",
@@ -23,7 +20,6 @@ async function register({ name, email, password }) {
         StatusCodes.BAD_REQUEST
       );
     }
-    //Email Validation and much more Validation
     if (!checkEmail(email)) {
       throw new AppError(
         "Please provide correct email address",
@@ -31,7 +27,6 @@ async function register({ name, email, password }) {
       );
     }
 
-    /* Database Level Validation */
     const userFound = await User.findOne({ email });
     if (userFound)
       throw new AppError(
@@ -59,7 +54,6 @@ async function register({ name, email, password }) {
 
     return { user, JWT_Token };
   } catch (error) {
-    console.log("User Registration has been failed due to:", error);
     if (error instanceof AppError) throw error;
     throw new AppError(
       "Unable to Process User Registration:" + error,
@@ -70,9 +64,6 @@ async function register({ name, email, password }) {
 
 async function signIn({ email, password }) {
   try {
-    //Code Logic
-
-    /* User Data level:- Validating Input Data which is coming from Client{Frontend, PostMan etc} */
     if (!email || !password) {
       throw new AppError(
         "One of the field is missing, Please check",
@@ -86,7 +77,6 @@ async function signIn({ email, password }) {
         StatusCodes.BAD_REQUEST
       );
     }
-    //Email Validation and much more Validation
     if (!checkEmail(email)) {
       throw new AppError(
         "Please provide correct email address",
@@ -94,7 +84,6 @@ async function signIn({ email, password }) {
       );
     }
 
-    /* Database Level Validation */
     const userFound = await User.findOne({ email });
     if (!userFound)
       throw new AppError(
@@ -118,7 +107,6 @@ async function signIn({ email, password }) {
 
     return { user: userFound, JWT_Token };
   } catch (error) {
-    console.log("User Login has been failed due to:", error);
     if (error instanceof AppError) throw error;
     throw new AppError(
       "Unable to Process User Login:" + error,
@@ -129,9 +117,6 @@ async function signIn({ email, password }) {
 
 async function update({ name, email, newPassword, currentPassword, userId }) {
   try {
-    //Code Logic
-
-    /* User Data level:- Validating Input Data which is coming from Client{Frontend, PostMan etc} */
     if (!currentPassword) {
       throw new AppError(
         "Please provide current password first",
@@ -152,7 +137,6 @@ async function update({ name, email, newPassword, currentPassword, userId }) {
         StatusCodes.BAD_REQUEST
       );
     }
-    //Email Validation and much more Validation
     if (email && !checkEmail(email)) {
       throw new AppError(
         "Please provide correct email address",
@@ -160,7 +144,6 @@ async function update({ name, email, newPassword, currentPassword, userId }) {
       );
     }
 
-    /* Database Level Validation */
     const userFound = await User.findById(userId);
     if (!userFound)
       throw new AppError("User not found in database", StatusCodes.BAD_REQUEST);
@@ -179,7 +162,6 @@ async function update({ name, email, newPassword, currentPassword, userId }) {
     userFound.password = newPassword || userFound.password;
     return await userFound.save();
   } catch (error) {
-    console.log("Unable to Update User due to:", error);
     if (error instanceof AppError) throw error;
     throw new AppError(
       "Unable to Update User:" + error,
