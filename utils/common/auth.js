@@ -8,16 +8,14 @@ function createToken(input) {
     });
     return token;
   } catch (error) {
-    console.log("Error has been occurred while creating token:", error);
     throw error;
   }
 }
 
 function verifyToken(token) {
   try {
-    return jwt.verify(token, process.env.JWT_SECRET); //This will return boolean value either true or false
+    return jwt.verify(token, process.env.JWT_SECRET);
   } catch (error) {
-    console.log("Unable top verify user:", error);
     throw error;
   }
 }
@@ -26,7 +24,6 @@ function checkPassword(plainPassword, encryptedPassword) {
   try {
     return bcrypt.compareSync(plainPassword, encryptedPassword);
   } catch (error) {
-    console.log("Error has been occurred while comparing password:", error);
     throw error;
   }
 }

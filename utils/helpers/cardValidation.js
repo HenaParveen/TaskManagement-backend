@@ -10,6 +10,7 @@ const cardValidation = Joi.object({
     })
   ),
   dueDate: Joi.allow(null),
+  assignee: Joi.allow(null),
   status: Joi.string()
     .valid("backlog", "todo", "progress", "done")
     .default("todo"),
