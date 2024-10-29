@@ -31,10 +31,7 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-//This is a kind middleware which convert the string password to hashed password with help of bcrypt library
 userSchema.pre("save", function (next) {
-  /* This peace of code check if password is not modified then it should return from here no need to hash again, a 
-  it is already hashed during registration it seems we are doing some other curd operation on existing schema/model */
   if (!this.isModified("password")) return next();
 
   //Hash the Password

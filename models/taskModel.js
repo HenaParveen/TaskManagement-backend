@@ -22,6 +22,10 @@ const taskSchema = new mongoose.Schema(
         },
       },
     ],
+    assignee: {
+      type: Array,
+      default: [],
+    },
     dueDate: {
       type: String,
     },
