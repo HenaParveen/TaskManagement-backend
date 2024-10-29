@@ -3,8 +3,6 @@ const { TaskController } = require("../../controllers");
 
 const { AuthMiddleware } = require("../../middlewares");
 
-/* to send the req to proper controllers */
-
 const taskRouter = express.Router();
 
 taskRouter.get(
@@ -34,7 +32,7 @@ taskRouter.patch(
 taskRouter.patch(
   "/update/status/:cardId",
   AuthMiddleware.checkAuthentication,
-  TaskController.updateCardStatus
+  TaskController.updateTaskStatus
 );
 
 taskRouter.delete(
@@ -42,9 +40,10 @@ taskRouter.delete(
   AuthMiddleware.checkAuthentication,
   TaskController.deleteCard
 );
+taskRouter.patch(
+  "/assignee/update",
+  AuthMiddleware.checkAuthentication,
+  TaskController.addAssignee
+);
 
 module.exports = taskRouter;
-
-// http://localhost:5173/api/v1/task/all/thismonth/inprogress
-// http://localhost:5173/api/v1/task/analytics
-// http://localhost:5173/api/v1/task/QWERTYUI!@#$%^&*asdfghjk234567
