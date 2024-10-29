@@ -39,16 +39,11 @@ async function checkAuthentication(req, res, next) {
         StatusCodes.NOT_FOUND
       );
 
-    /* All criteria has been passed here now let the user access the server resource whatever he/she is asking */
     if (token && isCorrectToken && user) {
-      req.user = user; // this is import line of code make sure you should understand whey we are setting user inside request because we can access this user later in another file
+      req.user = user;
       next();
     }
   } catch (error) {
-    console.log(
-      "Error has been occurred during Checking Authentication Process:",
-      error
-    );
     ErrorResponse.message = error.explanation;
     ErrorResponse.error = error;
     let statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
