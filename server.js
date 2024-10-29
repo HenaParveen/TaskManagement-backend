@@ -1,12 +1,10 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
-require("dotenv").config(); //const envInstance=require("dotenv"); envInstance.config()
+require("dotenv").config();
 const db = require("./db/Database");
 const cors = require("cors");
 const apiRoutes = require("./routes");
 
-/* Important Import for Security Enhancement */
-// import morgan from "morgan";
 const morgan = require("morgan");
 const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
@@ -16,10 +14,8 @@ const createHttpError = require("http-errors");
 const app = express();
 const origin = process.env.CLIENT_ORIGIN || "http://localhost:5173";
 
-/* Read the Req input*/
-
-app.use(express.json()); //text manual to read How the machine works?
-app.use(express.urlencoded({ extended: true })); //Image Manual
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 //Morgan
 if (process.env.NODE_ENV !== "production") {
@@ -54,11 +50,6 @@ app.use((req, res, next) => {
   next();
 });
 
-/* Add More Middleware to Protect the server and data */
-
-//req=Request{Server takes input from this object}, res=Response{server send any input/result from this object}
-
-/* 1st level of routing till api keyword */
 app.use("/api", apiRoutes);
 
 //Route Doesn't found
@@ -78,9 +69,9 @@ app.use(async (err, req, res, next) => {
 });
 
 const port = process.env.PORT || 5000;
-app.listen(port, () => {
+app.listen(port, (err) => {
   if (err) {
-    console.log("Error has been occurred:");
+    console.log("Error has been occurred:" + err);
   }
-  console.log(`Server has started successfully in ${ServerConfig.PORT} port`);
+  console.log(`Server has started successfully in ${process.env.PORT} port`);
 });
