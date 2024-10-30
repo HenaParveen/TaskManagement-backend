@@ -34,19 +34,29 @@ app.use(cookieParser());
 //Zip
 app.use(compression());
 
-//Cors
-app.use(
-  cors({
-    origin: origin,
-    credentials: true,
-  })
-);
+// app.use(
+//   cors({
+//     origin: origin,
+//     credentials: true,
+//     optionSuccessStatus: 200,
+//     methods: "*",
+//     preflightContinue: true,
+//   })
+// );
 
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", origin);
-  res.header("Access-Control-Allow-Methods", "GET, POST,PATCH,DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type");
-  res.header("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Allow-Origin", origin);
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,CONNECT,TRACE"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, X-Content-Type-Options, Accept, X-Requested-With, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+  );
+  res.setHeader("Access-Control-Allow-Credentials", true);
+  res.setHeader("Access-Control-Max-Age", 7200);
+
   next();
 });
 
