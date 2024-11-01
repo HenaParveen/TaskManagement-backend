@@ -102,8 +102,13 @@ async function updateCard(req, res) {
   try {
     const cardDetails = req.body;
     const { cardId } = req.params;
-    const userId = req.user._id;
-    const response = await TaskService.updateCard(cardId, cardDetails, userId);
+    const { _id, email } = req.user;
+    const response = await TaskService.updateCard(
+      cardId,
+      cardDetails,
+      _id,
+      email
+    );
 
     SuccessResponse.data = response;
     SuccessResponse.message = "Card updated successfully";
@@ -150,12 +155,13 @@ async function updateTaskStatus(req, res) {
   try {
     const { tasks, status } = req.body;
     const { cardId } = req.params;
-    const userId = req.user._id;
+    const { _id, email } = req.user;
     const response = await TaskService.updateTaskStatus(
       cardId,
       tasks,
       status,
-      userId
+      _id,
+      email
     );
 
     SuccessResponse.data = response;
@@ -178,8 +184,8 @@ async function updateTaskStatus(req, res) {
 async function deleteCard(req, res) {
   try {
     const { cardId } = req.params;
-    const userId = req.user._id;
-    const response = await TaskService.deleteCard(cardId, userId);
+    const { _id, email } = req.user;
+    const response = await TaskService.deleteCard(cardId, _id, email);
 
     SuccessResponse.data = response;
     SuccessResponse.message = "Card deleted successfully";

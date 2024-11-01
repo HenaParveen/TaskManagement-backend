@@ -149,7 +149,7 @@ async function addCard(cardDetails, userId) {
   }
 }
 
-async function updateCard(cardId, cardDetails, userId) {
+async function updateCard(cardId, cardDetails, userId, email) {
   try {
     const cardData = await cardValidation.validateAsync(cardDetails);
     if (!cardId) {
@@ -166,11 +166,21 @@ async function updateCard(cardId, cardDetails, userId) {
       );
     }
 
+    console.log(
+      "Update Card:",
+      existingCard.refUserId,
+      userId,
+      existingCard.assignee
+    );
+
     if (existingCard.refUserId.toString() !== userId.toString())
-      throw new AppError(
-        "Unauthorized to Update the card",
-        StatusCodes.UNAUTHORIZED
-      );
+      if (existingCard.assignee.toString() !== email.toString()) {
+        throw new AppError(
+          "Unauthorized to delete the card",
+          StatusCodes.UNAUTHORIZED
+        );
+      }
+
     existingCard.title = cardData.title || existingCard.title;
     existingCard.priority = cardData.priority || existingCard.priority;
     existingCard.tasks = cardData.tasks || existingCard.tasks;
@@ -212,7 +222,7 @@ async function addAssignee(email, userId) {
     );
   }
 }
-async function updateTaskStatus(cardId, tasks, status, userId) {
+async function updateTaskStatus(cardId, tasks, status, userId, email) {
   try {
     if (!cardId) {
       throw new AppError(
@@ -227,8 +237,9 @@ async function updateTaskStatus(cardId, tasks, status, userId) {
         StatusCodes.BAD_REQUEST
       );
     }
+
     if (existingCard.refUserId.toString() !== userId.toString())
-      if (existingCard.assignee.toString() !== userId.toString()) {
+      if (existingCard.assignee.toString() !== email.toString()) {
         throw new AppError(
           "Unauthorized to delete the card",
           StatusCodes.UNAUTHORIZED
@@ -247,7 +258,7 @@ async function updateTaskStatus(cardId, tasks, status, userId) {
     );
   }
 }
-async function deleteCard(cardId, userId) {
+async function deleteCard(cardId, userId, email) {
   try {
     if (!cardId) {
       throw new AppError(
@@ -263,7 +274,7 @@ async function deleteCard(cardId, userId) {
       );
     }
     if (existingCard.refUserId.toString() !== userId.toString())
-      if (existingCard.assignee.toString() !== userId.toString()) {
+      if (existingCard.assignee.toString() !== email.toString()) {
         throw new AppError(
           "Unauthorized to delete the card",
           StatusCodes.UNAUTHORIZED
