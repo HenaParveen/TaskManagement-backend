@@ -117,49 +117,63 @@ async function signIn({ email, password }) {
 
 async function update({ name, email, newPassword, currentPassword, userId }) {
   try {
-    if (!currentPassword) {
-      throw new AppError(
-        "Please provide current password first",
-        StatusCodes.BAD_REQUEST
-      );
-    }
-
     if (!name && !email && !newPassword) {
       throw new AppError(
-        "Please provide at-least one field to update",
+        "Please provide at least one field to update",
         StatusCodes.BAD_REQUEST
       );
     }
 
-    if (newPassword && newPassword.length < 6) {
+    const fieldsToUpdate = [name, email, newPassword].filter(Boolean).length;
+
+    if (fieldsToUpdate > 1) {
       throw new AppError(
-        "Please provide at-least 6 character password",
+        "Please update only one field at a time",
         StatusCodes.BAD_REQUEST
       );
+    }
+
+    if (newPassword) {
+      if (!currentPassword) {
+        throw new AppError(
+          "Please provide current password to update your password",
+          StatusCodes.BAD_REQUEST
+        );
+      }
+      if (newPassword.length < 6) {
+        throw new AppError(
+          "Password must be at least 6 characters long",
+          StatusCodes.BAD_REQUEST
+        );
+      }
     }
     if (email && !checkEmail(email)) {
       throw new AppError(
-        "Please provide correct email address",
+        "Please provide a valid email address",
         StatusCodes.BAD_REQUEST
       );
     }
 
     const userFound = await User.findById(userId);
-    if (!userFound)
-      throw new AppError("User not found in database", StatusCodes.BAD_REQUEST);
+    if (!userFound) throw new AppError("User not found", StatusCodes.NOT_FOUND);
 
-    const passMatched = AUTH.checkPassword(currentPassword, userFound.password);
-
-    if (!passMatched) {
-      throw new AppError(
-        "Please provide correct current password to update the record",
-        StatusCodes.BAD_REQUEST
+    if (newPassword && currentPassword) {
+      const passMatched = AUTH.checkPassword(
+        currentPassword,
+        userFound.password
       );
+      if (!passMatched) {
+        throw new AppError(
+          "Current password is incorrect",
+          StatusCodes.BAD_REQUEST
+        );
+      }
     }
 
-    userFound.name = name || userFound.name;
-    userFound.email = email || userFound.email;
-    userFound.password = newPassword || userFound.password;
+    if (name) userFound.name = name;
+    if (email) userFound.email = email;
+    if (newPassword) userFound.password = newPassword;
+
     return await userFound.save();
   } catch (error) {
     if (error instanceof AppError) throw error;
