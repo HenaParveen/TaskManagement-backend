@@ -135,7 +135,7 @@ async function addCard(cardDetails, userId) {
     const cardData = await cardValidation.validateAsync(cardDetails);
     const newCard = new TaskModel({
       ...cardData,
-      assignee: [cardData.assignee] || [],
+      assignee: cardData.assignee || "",
       refUserId: userId,
     });
     const data = await newCard.save();
@@ -177,8 +177,8 @@ async function updateCard(cardId, cardDetails, userId) {
     existingCard.dueDate = cardData.dueDate || existingCard.dueDate;
     existingCard.status = cardData.status || existingCard.status;
     existingCard.assignee = cardData.assignee
-      ? [...existingCard.assignee, cardData.assignee]
-      : [...existingCard.assignee];
+      ? cardData.assignee
+      : existingCard.assignee;
     const updatedCard = await existingCard.save();
     return updatedCard;
   } catch (error) {
@@ -200,8 +200,8 @@ async function addAssignee(email, userId) {
     }
 
     const response = await TaskModel.updateMany(
-      { refUserId: userId },
-      { $addToSet: { assignee: email } }
+      { refUserId: userId, assignee: { $ne: email } },
+      { assignee: email }
     );
     return response;
   } catch (error) {
@@ -228,10 +228,13 @@ async function updateTaskStatus(cardId, tasks, status, userId) {
       );
     }
     if (existingCard.refUserId.toString() !== userId.toString())
-      throw new AppError(
-        "Unauthorized to Update the card status",
-        StatusCodes.UNAUTHORIZED
-      );
+      if (existingCard.assignee.toString() !== userId.toString()) {
+        throw new AppError(
+          "Unauthorized to delete the card",
+          StatusCodes.UNAUTHORIZED
+        );
+      }
+
     existingCard.tasks = tasks || existingCard.tasks;
     existingCard.status = status || existingCard.status;
     const updatedCard = await existingCard.save();
@@ -260,10 +263,13 @@ async function deleteCard(cardId, userId) {
       );
     }
     if (existingCard.refUserId.toString() !== userId.toString())
-      throw new AppError(
-        "Unauthorized to delete the card",
-        StatusCodes.UNAUTHORIZED
-      );
+      if (existingCard.assignee.toString() !== userId.toString()) {
+        throw new AppError(
+          "Unauthorized to delete the card",
+          StatusCodes.UNAUTHORIZED
+        );
+      }
+
     const deletedCard = await existingCard.deleteOne();
     return deleteCard;
   } catch (error) {
