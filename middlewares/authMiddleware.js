@@ -61,6 +61,7 @@ async function checkAuthenticationStatus(req, res, next) {
     if (!token) return res.json(false);
     const response = AUTH.verifyToken(token);
     if (!response) return res.json(false);
+
     return res.json(true);
   } catch (error) {
     return res.status(StatusCodes.UNAUTHORIZED).json(false);

@@ -89,12 +89,12 @@ async function signOut(req, res) {
     SuccessResponse.message = "User Logout Successful";
 
     res.status(StatusCodes.OK);
-    res.cookie("token", "", {
+    res.clearCookie("token", {
       httpOnly: true,
       path: "/",
       secure: true,
       sameSite: "none",
-      expiresIn: process.env.JWT_EXPIRY,
+      expiresIn: 0,
     });
     res.json(SuccessResponse);
     return res;
