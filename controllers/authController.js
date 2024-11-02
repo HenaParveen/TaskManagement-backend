@@ -128,6 +128,15 @@ async function update(req, res) {
     };
     SuccessResponse.message = "User updated Successfully";
     res.status(StatusCodes.OK);
+    if (req.body.email || req.body.currentPassword) {
+      res.clearCookie("token", {
+        httpOnly: true,
+        path: "/",
+        secure: true,
+        sameSite: "none",
+        expiresIn: 0,
+      });
+    }
     res.json(SuccessResponse);
     return res;
   } catch (error) {
