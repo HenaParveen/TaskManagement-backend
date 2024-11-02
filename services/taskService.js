@@ -111,20 +111,16 @@ async function getAnalytics(userId) {
 async function getCard(cardId) {
   try {
     if (!cardId)
-      throw new AppError("Please provider card Id", StatusCodes.BAD_REQUEST);
+      throw new AppError("Please provider Task Id", StatusCodes.BAD_REQUEST);
     const card = await TaskModel.findById(cardId);
 
-    if (!card)
-      throw new AppError(
-        "Card doesn't found in database",
-        StatusCodes.NOT_FOUND
-      );
+    if (!card) throw new AppError("Task doesn't found", StatusCodes.NOT_FOUND);
 
     return card;
   } catch (error) {
     if (error instanceof AppError) throw error;
     throw new AppError(
-      "Unable to fetch card details:" + error,
+      "Unable to fetch Task details:" + error,
       StatusCodes.INTERNAL_SERVER_ERROR
     );
   }
@@ -143,7 +139,7 @@ async function addCard(cardDetails, userId) {
   } catch (error) {
     if (error instanceof AppError) throw error;
     throw new AppError(
-      "Unable to Add card :" + error,
+      "Unable to Add Task :" + error,
       StatusCodes.INTERNAL_SERVER_ERROR
     );
   }
@@ -154,29 +150,22 @@ async function updateCard(cardId, cardDetails, userId, email) {
     const cardData = await cardValidation.validateAsync(cardDetails);
     if (!cardId) {
       throw new AppError(
-        "Please provide cardId to update it",
+        "Please provide Task ID to update it",
         StatusCodes.BAD_REQUEST
       );
     }
     const existingCard = await TaskModel.findById(cardId);
     if (!existingCard) {
       throw new AppError(
-        "Can not found in database, please provide valid card Id",
+        "Task not found, please provide valid Task ID",
         StatusCodes.BAD_REQUEST
       );
     }
 
-    console.log(
-      "Update Card:",
-      existingCard.refUserId,
-      userId,
-      existingCard.assignee
-    );
-
     if (existingCard.refUserId.toString() !== userId.toString())
       if (existingCard.assignee.toString() !== email.toString()) {
         throw new AppError(
-          "Unauthorized to delete the card",
+          "Unauthorized to delete the Task",
           StatusCodes.UNAUTHORIZED
         );
       }
@@ -194,7 +183,7 @@ async function updateCard(cardId, cardDetails, userId, email) {
   } catch (error) {
     if (error instanceof AppError) throw error;
     throw new AppError(
-      "Unable to update card :" + error,
+      "Unable to update Task :" + error,
       StatusCodes.INTERNAL_SERVER_ERROR
     );
   }
@@ -217,7 +206,7 @@ async function addAssignee(email, userId) {
   } catch (error) {
     if (error instanceof AppError) throw error;
     throw new AppError(
-      "Unable to update assignee to current user's all card :" + error,
+      "Unable to update assignee to the Board :" + error,
       StatusCodes.INTERNAL_SERVER_ERROR
     );
   }
@@ -226,14 +215,14 @@ async function updateTaskStatus(cardId, tasks, status, userId, email) {
   try {
     if (!cardId) {
       throw new AppError(
-        "Please provide cardId to update it",
+        "Please provide Task ID to update it",
         StatusCodes.BAD_REQUEST
       );
     }
     const existingCard = await TaskModel.findById(cardId);
     if (!existingCard) {
       throw new AppError(
-        "Can not found in database, please provide valid card Id",
+        "Task not found, please provide valid Task Id",
         StatusCodes.BAD_REQUEST
       );
     }
@@ -241,7 +230,7 @@ async function updateTaskStatus(cardId, tasks, status, userId, email) {
     if (existingCard.refUserId.toString() !== userId.toString())
       if (existingCard.assignee.toString() !== email.toString()) {
         throw new AppError(
-          "Unauthorized to delete the card",
+          "Unauthorized to delete the Task",
           StatusCodes.UNAUTHORIZED
         );
       }
@@ -262,21 +251,21 @@ async function deleteCard(cardId, userId, email) {
   try {
     if (!cardId) {
       throw new AppError(
-        "Please provide cardId to update it",
+        "Please provide Task ID to update it",
         StatusCodes.BAD_REQUEST
       );
     }
     const existingCard = await TaskModel.findById(cardId);
     if (!existingCard) {
       throw new AppError(
-        "Can not found in database, please provide valid card Id",
+        "Task not found, please provide valid Task ID",
         StatusCodes.BAD_REQUEST
       );
     }
     if (existingCard.refUserId.toString() !== userId.toString())
       if (existingCard.assignee.toString() !== email.toString()) {
         throw new AppError(
-          "Unauthorized to delete the card",
+          "Unauthorized to delete the Task",
           StatusCodes.UNAUTHORIZED
         );
       }
@@ -286,7 +275,7 @@ async function deleteCard(cardId, userId, email) {
   } catch (error) {
     if (error instanceof AppError) throw error;
     throw new AppError(
-      "Unable to delete card :" + error,
+      "Unable to delete Task",
       StatusCodes.INTERNAL_SERVER_ERROR
     );
   }

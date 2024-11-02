@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
-/* 1st create a schema which define how the collection inside database will look, and also represent the data visualization */
 const userSchema = new mongoose.Schema(
   {
     name: {

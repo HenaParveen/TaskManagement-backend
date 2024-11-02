@@ -18,5 +18,10 @@ router.get(
   AuthMiddleware.checkAuthentication,
   AuthController.userInfo
 );
+router.get(
+  "/emails",
+  AuthMiddleware.checkAuthentication,
+  AuthController.getAllEmail
+);
 
 module.exports = router;

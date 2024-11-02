@@ -18,7 +18,7 @@ async function register(req, res) {
       email,
       JWT_Token,
     };
-    SuccessResponse.message = "User registration Successful";
+    SuccessResponse.message = "User Registration Successful";
 
     res.status(StatusCodes.OK);
     res.cookie("token", JWT_Token, {
@@ -126,7 +126,7 @@ async function update(req, res) {
       name,
       email,
     };
-    SuccessResponse.message = "User updated Successful";
+    SuccessResponse.message = "User updated Successfully";
     res.status(StatusCodes.OK);
     res.json(SuccessResponse);
     return res;
@@ -166,10 +166,32 @@ async function userInfo(req, res) {
   }
 }
 
+async function getAllEmail(req, res) {
+  try {
+    const email = req.user.email;
+    const response = await UserService.getAllEmail(email);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "All Email retrieved";
+    res.status(StatusCodes.OK);
+    res.json(SuccessResponse);
+    return res;
+  } catch (error) {
+    ErrorResponse.message = error.explanation;
+    ErrorResponse.data = error;
+    ErrorResponse.stack =
+      process.env.NODE_ENV === "development" ? error.stack : null;
+
+    return res
+      .status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
+      .json(ErrorResponse);
+  }
+}
+
 module.exports = {
   register,
   signIn,
   signOut,
   update,
   userInfo,
+  getAllEmail,
 };

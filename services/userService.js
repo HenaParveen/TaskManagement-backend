@@ -3,7 +3,6 @@ const { StatusCodes } = require("http-status-codes");
 const User = require("../models/userModel");
 const { AUTH } = require("../utils/common");
 const { checkEmail } = require("../utils/helpers/helper");
-const bcrypt = require("bcrypt");
 
 async function register({ name, email, password }) {
   try {
@@ -16,7 +15,7 @@ async function register({ name, email, password }) {
 
     if (password.length < 6) {
       throw new AppError(
-        "Please provide atleast 6 character password",
+        "Please provide at least 6 character password",
         StatusCodes.BAD_REQUEST
       );
     }
@@ -42,7 +41,7 @@ async function register({ name, email, password }) {
 
     if (!user)
       throw new AppError(
-        "User registration is failed , Please try again",
+        "User Registration is failed , Please try again",
         StatusCodes.INTERNAL_SERVER_ERROR
       );
     const JWT_Token = AUTH.createToken({ _id: user._id.toString() });
@@ -73,7 +72,7 @@ async function signIn({ email, password }) {
 
     if (password.length < 6) {
       throw new AppError(
-        "Please provide atleast 6 character password",
+        "Please provide at least 6 character password",
         StatusCodes.BAD_REQUEST
       );
     }
@@ -183,8 +182,26 @@ async function update({ name, email, newPassword, currentPassword, userId }) {
     );
   }
 }
+
+async function getAllEmail(email) {
+  try {
+    const cursor = await User.find({});
+    const emails = [];
+    await cursor.forEach(
+      (user) => user.email !== email && emails.push(user.email)
+    );
+    return emails;
+  } catch (error) {
+    if (error instanceof AppError) throw error;
+    throw new AppError(
+      "Unable to Retrieve all the emails:" + error,
+      StatusCodes.INTERNAL_SERVER_ERROR
+    );
+  }
+}
 module.exports = {
   register,
   signIn,
   update,
+  getAllEmail,
 };

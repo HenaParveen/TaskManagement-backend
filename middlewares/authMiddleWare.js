@@ -6,7 +6,6 @@ const { ErrorResponse } = require("../utils/common");
 
 async function checkAuthentication(req, res, next) {
   try {
-    /* 1st step to check if Token is present or not */
     const token = req.cookies.token;
     if (!token) {
       throw new AppError(
@@ -15,12 +14,7 @@ async function checkAuthentication(req, res, next) {
       );
     }
 
-    /* if Token is present then verify the token is correct whatever has been generated at the start */
-    const isCorrectToken =
-      AUTH.verifyToken(
-        token
-      ); /* Here jwt.verify method will return _id which we had passed as input
-    inside a object to the jwt.sign method for creating a token */
+    const isCorrectToken = AUTH.verifyToken(token);
 
     if (!isCorrectToken)
       throw new AppError(
@@ -28,7 +22,6 @@ async function checkAuthentication(req, res, next) {
         StatusCodes.BAD_REQUEST
       );
 
-    /* if token has verified and found correct token then 3rd step is to check in database if user is valid user or not */
     let user;
     if (isCorrectToken)
       user = await User.findById(isCorrectToken._id).select("-password");
