@@ -55,6 +55,18 @@ async function checkAuthentication(req, res, next) {
   }
 }
 
+async function checkAuthenticationStatus(req, res, next) {
+  try {
+    const token = req.cookies.token;
+    if (!token) return res.json(false);
+    const response = AUTH.verifyToken(token);
+    if (!response) return res.json(false);
+    return res.json(true);
+  } catch (error) {
+    return res.status(StatusCodes.UNAUTHORIZED).json(false);
+  }
+}
 module.exports = {
   checkAuthentication,
+  checkAuthenticationStatus,
 };

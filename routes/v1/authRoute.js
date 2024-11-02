@@ -23,5 +23,6 @@ router.get(
   AuthMiddleware.checkAuthentication,
   AuthController.getAllEmail
 );
+router.get("/loginStatus", AuthMiddleware.checkAuthenticationStatus);
 
 module.exports = router;
